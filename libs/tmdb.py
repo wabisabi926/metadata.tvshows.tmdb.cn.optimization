@@ -21,6 +21,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import unicodedata
+import xbmcgui
 from math import floor
 from pprint import pformat
 from . import cache, data_utils, api_utils, settings, imdbratings, traktratings
@@ -47,7 +48,6 @@ EPISODE_URL = BASE_URL.format('tv/{}/season/{}/episode/{}')
 FANARTTV_URL = 'https://webservice.fanart.tv/v3/tv/{}'
 FANARTTV_PARAMS = {'api_key': settings.FANARTTV_CLOWNCAR}
 
-
 def _get_params():
     source_settings = settings.getSourceSettings()
     params = TMDB_PARAMS.copy()
@@ -66,6 +66,7 @@ def search_show(title, year=None):
     """
     source_settings = settings.getSourceSettings()
     api_utils.set_headers(dict(HEADERS))
+    api_utils.set_dns_settings(source_settings.get("DNS_SETTINGS", {}))
     params = _get_params()
     results = []
     ext_media_id = data_utils.parse_media_id(title)
@@ -110,6 +111,7 @@ def find_by_id(unique_ids):
                      'tvdb', 'tiktok', 'twitter', 'wikidata', 'youtube']
     source_settings = settings.getSourceSettings()
     api_utils.set_headers(dict(HEADERS))
+    api_utils.set_dns_settings(source_settings.get("DNS_SETTINGS", {}))
     params = _get_params()
     for key, value in unique_ids.items():
         if key in supported_ids:
@@ -184,6 +186,7 @@ def load_show_info(show_id, ep_grouping=None, named_seasons=None):
 
     api_utils.set_headers(dict(HEADERS))
     source_settings = settings.getSourceSettings()
+    api_utils.set_dns_settings(source_settings.get("DNS_SETTINGS", {}))
     if named_seasons == None:
         named_seasons = []
     show_info = cache.load_show_info_from_cache(show_id)
@@ -208,21 +211,40 @@ def load_show_info(show_id, ep_grouping=None, named_seasons=None):
             params['language'] = source_settings["LANG_DETAILS"]
         season_map = {}
         params['append_to_response'] = 'credits,images'
-        for season in show_info.get('seasons', []):
-            season_url = SEASON_URL.format(
-                show_id, season.get('season_number', 0))
-            season_info = api_utils.load_info(
-                season_url, params=params, default={}, verboselog=source_settings["VERBOSELOG"])
+        
+        # --- Batch Request Optimization ---
+        season_requests = []
+        seasons_list = show_info.get('seasons', [])
+        for season in seasons_list:
+            season_url = SEASON_URL.format(show_id, season.get('season_number', 0))
+            season_requests.append({'url': season_url, 'params': params.copy()})
+            
+        season_results = api_utils.load_info_batch(season_requests, default={}, verboselog=source_settings["VERBOSELOG"])
+        
+        # Handle Fallbacks (en-US)
+        fallback_indices = []
+        fallback_requests = []
+        
+        for i, season_info in enumerate(season_results):
             if (season_info.get('overview', '') == '' or season_info.get('name', '').lower().startswith('season')) and source_settings["LANG_DETAILS"] != 'en-US':
-                params['language'] = 'en-US'
-                season_info_backup = api_utils.load_info(
-                    season_url, params=params, default={}, verboselog=source_settings["VERBOSELOG"])
-                params['language'] = source_settings["LANG_DETAILS"]
+                fallback_indices.append(i)
+                req = season_requests[i].copy()
+                req['params'] = req['params'].copy()
+                req['params']['language'] = 'en-US'
+                fallback_requests.append(req)
+                
+        if fallback_requests:
+            fallback_results = api_utils.load_info_batch(fallback_requests, default={}, verboselog=source_settings["VERBOSELOG"])
+            for i, result in enumerate(fallback_results):
+                original_index = fallback_indices[i]
+                season_info = season_results[original_index]
                 if season_info.get('overview', '') == '':
-                    season_info['overview'] = season_info_backup.get(
-                        'overview', '')
+                    season_info['overview'] = result.get('overview', '')
                 if season_info.get('name', '').lower().startswith('season'):
-                    season_info['name'] = season_info_backup.get('name', '')
+                    season_info['name'] = result.get('name', '')
+
+        for i, season in enumerate(seasons_list):
+            season_info = season_results[i]
             # this is part of a work around for xbmcgui.ListItem.addSeasons() not respecting NFO file information
             for named_season in named_seasons:
                 if str(named_season[0]) == str(season.get('season_number')):
@@ -234,6 +256,8 @@ def load_show_info(show_id, ep_grouping=None, named_seasons=None):
             season_info['images'] = _sort_image_types(
                 season_info.get('images', {}))
             season_map[str(season.get('season_number', 0))] = season_info
+        # ----------------------------------
+        
         show_info = load_episode_list(show_info, season_map, ep_grouping)
         show_info['ratings'] = load_ratings(show_info)
         show_info = load_fanarttv_art(show_info)
@@ -268,6 +292,7 @@ def load_episode_info(show_id, episode_id):
     """
     source_settings = settings.getSourceSettings()
     api_utils.set_headers(dict(HEADERS))
+    api_utils.set_dns_settings(source_settings.get("DNS_SETTINGS", {}))
     show_info = load_show_info(show_id)
     if show_info is not None:
         try:
@@ -344,8 +369,9 @@ def load_ratings(the_info, show_imdb_id=''):
         if rating_type == 'tmdb':
             ratings['tmdb'] = {'votes': the_info['vote_count'],
                                'rating': the_info['vote_average']}
-        elif rating_type == 'imdb' and imdb_id:
-            imdb_rating = imdbratings.get_details(imdb_id).get('ratings')
+        elif rating_type == 'imdb' and show_imdb_id:
+            # Use show IMDB ID instead of episode IMDB ID to avoid per-episode requests
+            imdb_rating = imdbratings.get_details(show_imdb_id).get('ratings')
             if imdb_rating:
                 ratings.update(imdb_rating)
         elif rating_type == 'trakt':

@@ -121,5 +121,20 @@ def getSourceSettings():
         'enable_fanarttv', addon.getSettingBool('enable_fanarttv'))
     settings["FANARTTV_CLIENTKEY"] = source_settings.get(
         'fanarttv_clientkey', addon.getSettingString('fanarttv_clientkey'))
+        
+    # DNS Settings
+    dns_map = {}
+    settings_map = {
+        'dns_tmdb_api': 'api.themoviedb.org',
+        'dns_fanart_tv': 'webservice.fanart.tv',
+        'dns_imdb_www': 'www.imdb.com',
+        'dns_trakt_tv': 'trakt.tv'
+    }
+    for setting_id, domain in settings_map.items():
+        # Try to get from source settings first, then addon settings
+        ip = source_settings.get(setting_id, addon.getSettingString(setting_id)).strip()
+        dns_map[domain] = ip
+    settings["DNS_SETTINGS"] = dns_map
+
     logger.debug('Sending back settings of: {}'.format(settings))
     return settings

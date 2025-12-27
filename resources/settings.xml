@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <settings version="1">
-	<section id="metadata.tvshows.themoviedb.org.python">
+	<section id="metadata.tvshows.tmdb.cn.optimization">
 		<category id="general" label="128" help="">
 			<group id="1">
 				<setting id="languageDetails" type="string" label="30000" help="">
@@ -232,12 +232,12 @@
 				</setting>
 				<setting id="studio_country" type="boolean" label="30006" help="">
 					<level>0</level>
-					<default>false</default>
+					<default>true</default>
 					<control type="toggle"/>
 				</setting>
 				<setting id="enab_trailer" type="boolean" label="30305" help="">
 					<level>0</level>
-					<default>true</default>
+					<default>false</default>
 					<control type="toggle"/>
 				</setting>
 				<setting id="players_opt" type="string" parent="enab_trailer" label="30306" help="">
@@ -373,6 +373,50 @@
 					</dependencies>
 					<control type="edit" format="string">
 						<heading/>
+					</control>
+				</setting>
+			</group>
+		</category>
+		<category id="dns_custom" label="32000">
+			<group id="1">
+				<setting id="dns_tmdb_api" type="string" label="32001" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>32001</heading>
+					</control>
+				</setting>
+				<setting id="dns_fanart_tv" type="string" label="32002" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>32002</heading>
+					</control>
+				</setting>
+				<setting id="dns_imdb_www" type="string" label="32003" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>32003</heading>
+					</control>
+				</setting>
+				<setting id="dns_trakt_tv" type="string" label="32004" help="">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>32004</heading>
 					</control>
 				</setting>
 			</group>

@@ -235,6 +235,7 @@ def router(paramstring):
     :raises RuntimeError: on unknown call action
     """
     params = dict(urllib.parse.parse_qsl(paramstring))
+    # logger.info('----Called addon with params: {}'.format(params))
     logger.debug('Called addon with params: {}'.format(sys.argv))
     if params['action'] == 'find':
         logger.debug('performing find action')
