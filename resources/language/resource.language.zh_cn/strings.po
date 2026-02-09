@@ -199,7 +199,7 @@ msgstr "图片代理"
 
 msgctxt "#32008"
 msgid "Fanart Base URL"
-msgstr "fanart基础URL"
+msgstr "Fanart 基础 URL"
 
 msgctxt "#32009"
 msgid "IMDb Base URL"
