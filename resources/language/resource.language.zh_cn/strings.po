@@ -19,7 +19,7 @@ msgstr ""
 
 msgctxt "Addon Summary"
 msgid "Fetch TV Show metadata from themoviedb.org"
-msgstr "从 themoviedb.org 获取剧集信息"
+msgstr "从 themoviedb.org 获取电视剧信息"
 
 msgctxt "Addon Description"
 msgid "The Movie Database (TMDb) is a community built movie and TV database. Every piece of data has been added by our amazing community dating back to 2008. TMDb's strong international focus and breadth of data is largely unmatched and something we're incredibly proud of. Put simply, we live and breathe community and that's precisely what makes us different."
@@ -59,11 +59,11 @@ msgstr "关键字添加为标签"
 
 msgctxt "#30008"
 msgid "Preferred language (Images)"
-msgstr ""
+msgstr "首选语言（图片）"
 
 msgctxt "#30009"
 msgid "Use different language for images"
-msgstr ""
+msgstr "为图片使用不同的语言"
 
 # empty strings from 30007 to 30099
 msgctxt "#30100"
@@ -167,7 +167,7 @@ msgstr "Tubed"
 
 msgctxt "#32000"
 msgid "DNS Resolution"
-msgstr "DNS解析"
+msgstr "DNS 解析"
 
 msgctxt "#32001"
 msgid "api.tmdb.org"
@@ -191,7 +191,7 @@ msgstr "代理"
 
 msgctxt "#32006"
 msgid "TMDB API Base URL"
-msgstr "TMDB API基础URL"
+msgstr "TMDB API 基础 URL"
 
 msgctxt "#32007"
 msgid "Image Proxy"
@@ -203,11 +203,11 @@ msgstr "fanart基础URL"
 
 msgctxt "#32009"
 msgid "IMDb Base URL"
-msgstr "imdb基础url"
+msgstr "IMDb 基础 URL"
 
 msgctxt "#32010"
 msgid "Trakt TV Base URL"
-msgstr "trakt tv基础url"
+msgstr "Trakt TV 基础 URL"
 
 msgctxt "#30021"
 msgid "Write Pinyin Initials to SortTitle"
